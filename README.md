@@ -524,3 +524,60 @@ Para extender el sistema:
 3. **Agregar categorías** de diseño en `MicroserviceRecommendationEngine`
 4. **Extender detección** de patrones en `DatabaseDetector` o `SensitiveDataDetector`
 
+## 📝 Estructura del Proyecto
+
+```
+src/main/java/com/extractor/
+├── MicroserviceInferenceMain.java     # Punto de entrada principal
+├── analyzer/                          # Motor de análisis de código
+│   ├── ProjectAnalyzer.java           # Análisis Spoon de AST
+│   ├── MetricsCalculator.java         # Cálculo de CBO y LCOM
+│   ├── PackageGroupAnalyzer.java      # Agrupación de dependencias por paquete
+│   ├── ComponentRegistry.java         # Registro de componentes
+│   ├── EdgeAccumulator.java           # Acumulador de relaciones
+│   ├── TableNameExtractor.java        # Extracción de nombres de tablas
+│   ├── ClassNameValidator.java        # Validación de nombres de clases
+│   ├── SpoonLauncherFactory.java      # Fábrica de configuración Spoon
+│   └── SourcePathDiscoverer.java      # Descubridor de rutas fuente
+├── constants/                         # Constantes del sistema
+│   └── LayerConstants.java            # Constantes de capas
+├── inference/                         # Motor de inferencia de microservicios
+│   ├── InferenceEngine.java           # Motor principal de clustering
+│   ├── ClusteringAlgorithm.java       # Algoritmo de clustering
+│   ├── InterClusterGraph.java         # Cálculo de relaciones entre clusters
+│   ├── ClusterConsolidator.java       # Consolidación greedy de clusters
+│   ├── MicroserviceNameGenerator.java # Generación de nombres de negocio
+│   ├── ViabilityScorer.java           # Clasificación de viabilidad
+│   ├── MicroserviceRecommendationEngine.java  # Recomendaciones
+│   ├── LayerClassifier.java           # Clasificación de capas arquitectónicas
+│   ├── Cluster.java                   # Modelo de cluster
+│   ├── ClusterMetrics.java            # Métricas de clusters
+│   ├── ClusterExplanation.java        # Explicaciones de clusters
+│   ├── ExplanationGenerator.java      # Generador de explicaciones
+│   ├── MicroserviceProposal.java      # Propuesta consolidada
+│   ├── MicroserviceCandidates.java    # Candidatos a microservicios
+│   ├── ConsolidatedArchitecture.java  # Arquitectura final
+│   ├── InferenceRule.java             # Reglas de inferencia
+│   ├── MetricsCalculator.java         # Calculador de métricas
+│   └── rules/                         # Reglas de inferencia
+│       ├── DomainAffinityRule.java    # Afinidad de dominio
+│       ├── SharedTableRule.java       # Regla de tablas compartidas
+│       └── CallPatternRule.java       # Regla de patrones de llamadas
+├── model/                             # Modelos de datos
+│   ├── DependencyGraph.java           # Modelo de grafo de dependencias
+│   ├── Component.java                 # Modelo de componente
+│   ├── Edge.java                      # Modelo de arista
+│   ├── EdgeData.java                  # Datos de arista
+│   ├── CallInfo.java                  # Información de llamadas
+│   ├── DependencyInfo.java            # Información de dependencias
+│   ├── PackageGroup.java              # Agrupación de paquetes
+│   └── WebArchitecture.java           # Arquitectura web
+└── utils/                             # Utilidades de detección
+    ├── DatabaseDetector.java          # Detección de BD
+    ├── DependencyResolver.java        # Resolución de dependencias
+    ├── SensitiveDataDetector.java     # Detección de datos sensibles
+    ├── SecretsDetector.java           # Detección de secretos
+    ├── MessagingDetector.java         # Detección de mensajería
+    └── EJBDetector.java               # Detección de EJBs
+```
+
