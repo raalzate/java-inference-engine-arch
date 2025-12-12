@@ -39,8 +39,6 @@ La herramienta genera automáticamente **4 archivos JSON** especializados:
 
 1. **`output.json`** - Grafo completo de dependencias con todos los componentes.
 2. **`output_architecture.json`** - Propuesta consolidada de microservicios con clasificación de viabilidad.
-3. **`output_layers.json`** - Arquitectura vertical por capas (Controller → Business → Data).
-4. **`output_web.json`** - Análisis de capa web (generado solo si existen componentes web).
 
 ## 📋 Referencia de Salidas
 
@@ -65,27 +63,8 @@ Contiene el análisis exhaustivo de todos los componentes y sus relaciones:
 }
 ```
 
-### 2. Capas Arquitectónicas (`output_layers.json`)
 
-Organiza los componentes en una estructura de capas limpia:
-
-```json
-{
-  "microservices": [
-    {
-      "name": "Cart",
-      "controllers": 2,
-      "business": 3,
-      "persistence": 4,
-      "domain": 1,
-      "transfer": 2,
-      "assessment": "Stack vertical completo"
-    }
-  ]
-}
-```
-
-### 3. Arquitectura Consolidada (`output_architecture.json`)
+### 2. Arquitectura Consolidada (`output_architecture.json`)
 
 Propuesta final de agrupación lógica:
 
