@@ -97,12 +97,12 @@ private static final double DATA_WEIGHT = 0.15;
 private static final double HIGH_VIABILITY_THRESHOLD = 0.7;
 private static final double MEDIUM_VIABILITY_THRESHOLD = 0.5;
 
-// Penalizaciones
-private static final double SMALL_SIZE_PENALTY = 0.3;  // size < 3
-private static final double LARGE_SIZE_PENALTY = 0.2;  // size > 50 y densidad < 0.3
+// Penalizaciones (Multiplicadores)
+private static final double SMALL_SIZE_PENALTY = 0.6;  // Multiplicador si size < 3
+private static final double MONOLITH_PENALTY = 0.7;    // Multiplicador si size > 50 y densidad < 0.5
 private static final int MIN_SIZE = 3;
 private static final int MAX_SIZE = 50;
-private static final double MIN_DENSITY = 0.3;
+private static final double MIN_DENSITY = 0.5;
 ```
 
 **Valores por defecto**:
@@ -111,6 +111,8 @@ private static final double MIN_DENSITY = 0.3;
 - `DATA_WEIGHT = 0.15` (15%)
 - `HIGH_VIABILITY_THRESHOLD = 0.7` (70%)
 - `MEDIUM_VIABILITY_THRESHOLD = 0.5` (50%)
+- `SMALL_SIZE_PENALTY = 0.6` (Reduce score al 60%)
+- `MONOLITH_PENALTY = 0.7` (Reduce score al 70%)
 
 **Cuándo modificar**:
 
@@ -246,7 +248,35 @@ Set<String> supportKeywords = Set.of(
     "feign", "gateway", "discovery"
 );
 ```
+### 7. Constantes de Análisis (AnalysisConstants)
 
+**Ubicación**: `src/main/java/com/extractor/constants/AnalysisConstants.java`
+
+Esta clase centraliza patrones y listas de palabras clave para la detección de componentes y datos sensibles.
+
+```java
+// Detección de Datos Sensibles
+public static final Set<String> SENSITIVE_KEYWORDS = Set.of(
+    "password", "ssn", "creditcard", "apikey", "secretkey", "token", "auth"
+);
+
+// Patrones SQL
+public static final Pattern SQL_TABLE_PATTERN = Pattern.compile(
+    "\\b(?:FROM|JOIN|INTO|UPDATE)\\s+([a-zA-Z0-9_]+)", Pattern.CASE_INSENSITIVE
+);
+
+// Annotaciones JPA/Spring
+public static final Set<String> SPRING_REPO_INTERFACES = Set.of(...);
+public static final Set<String> JPA_ENTITY_ANNOTATIONS = Set.of(...);
+```
+
+**Cuándo modificar**:
+- **Agregar nuevos keywords sensibles**: Para cumplir con políticas de seguridad específicas.
+- **Ajustar patrones SQL**: Si se usan dialectos SQL no estándar.
+- **Soportar nuevas anotaciones**: Si se migra a Jakarta EE 10+ o nuevas versiones de Spring.
+
+> [!IMPORTANT]
+> Cualquier cambio en `AnalysisConstants.java` requiere re-compilar el proyecto (`mvn clean package`) para que tenga efecto, ya que son constantes en tiempo de compilación.
 ## Casos de Uso de Configuración
 
 ### Caso 1: Arquitectura Hexagonal

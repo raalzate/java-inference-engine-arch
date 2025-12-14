@@ -118,12 +118,17 @@ Agrupa clusters relacionados usando evidencia del grafo, con guardrails para evi
 ENTRADA: clusters[], interClusterGraph
 SALIDA: groups[] (sets de cluster IDs consolidados)
 
-1. Ordenar aristas del grafo por evidenceScore (descendente)
-2. Inicializar cada cluster en su propio grupo
-3. Para cada arista (A, B, score):
-     Si shouldMerge(A, B, score):
-         Fusionar grupos de A y B
-4. Retornar grupos finales
+1. **Fase 0: Pre-consolidación por Nombre de Dominio**
+   - Agrupar clusters que generan el mismo nombre de negocio (ej. "Componente de Order").
+   - Fusionar si son compatibles (mismo tipo de infra/negocio, tamaño combinado <= 50).
+
+2. **Fase 1: Consolidación basada en Grafo**
+   - Ordenar aristas del grafo por evidenceScore (descendente)
+   - Para cada arista (A, B, score):
+       Si shouldMerge(A, B, score):
+           Fusionar grupos de A y B
+
+3. Retornar grupos finales
 ```
 
 ### Función `shouldMerge(A, B, score)`
@@ -135,9 +140,13 @@ Evaluación multi-criterio con guardrails:
 score >= 0.65 AND strongSignalCount >= 2
 ```
 
-**Strong signals**: señales individuales > 0.5
+**Strong signals**: 
+- `tableJaccard >= 0.4`
+- `callDensity >= 0.35`
+- `tokenSimilarity >= 0.6`
+- `eventLinks` (presencia)
 
-**Justificación**: Alta evidencia requiere múltiples señales confirmatorias.
+**Justificación**: Alta evidencia requiere múltiples señales confirmatorias con umbrales específicos.
 
 #### Criterio 2: Support Library Guard
 ```
@@ -223,11 +232,11 @@ auth → "Autenticación"
 swagger → "Documentación API"
 ```
 
-**Formato**: "Microservicio de {keyword1} & {keyword2}"
+**Formato**: "Componente de {keyword1} & {keyword2}"
 
 **Ejemplo**:
 - Input: {SecurityConfig, AuthFilter}
-- Output: "Microservicio de Seguridad & Autenticación"
+- Output: "Componente de Seguridad & Autenticación"
 
 #### 3.3 Nombres de Negocio
 
@@ -270,9 +279,9 @@ topTokens = top 2 tokens por score
 
 ```
 IF topTokens.size == 1:
-    name = "Microservicio de {token1}"
+    name = "Componente de {token1}"
 ELSE:
-    name = "Microservicio de {token1} y {token2}"
+    name = "Componente de {token1} y {token2}"
 ```
 
 **Ejemplo completo**:
@@ -283,7 +292,7 @@ Input: {OrderEntity, OrderService, OrderRepository, OrderLineItem, OrderDto}
 1. Tokens extraídos: {Order, OrderLine}
 2. Excluir: {Entity, Service, Repository, Dto, Item} → queda {Order, OrderLine}
 3. TF-IDF: Order=4/5, OrderLine=1/5 → top 2: {Order, OrderLine}
-4. Output: "Microservicio de Order y OrderLine"
+4. Output: "Componente de Order y OrderLine"
 ```
 
 ---
@@ -296,25 +305,25 @@ Clasificar propuestas consolidadas en Alta/Media/Baja viabilidad para guiar impl
 ### Fórmula de Viabilidad
 
 ```
-viabilityScore = 0.5 × cohesionAdj +
-                 0.35 × (1 - externalCoupling) +
-                 0.15 × dataCohesion
+score = 0.5 × cohesionAdj +
+        0.35 × (1 - externalCoupling) +
+        0.15 × dataCohesion
+
+// Penalizaciones aplicadas al score final
+IF totalSize < 3:
+    score = score * 0.6  (Penalización por tamaño muy pequeño)
+
+ELSE IF totalSize > 50 AND internalDensity < 0.5:
+    score = score * 0.7  (Penalización por monolito no cohesivo)
 ```
 
 #### 4.1 Cohesion Adjusted
 
 ```
-cohesionBase = average(cohesion of all clusters in proposal)
+averageCohesion = average(cohesion of all clusters provided)
+internalDensity = edgesWithinClusters / possibleEdges
 
-// Penalización por tamaño extremo
-IF size < 3:
-    penalty = 0.3  (muy pequeño, poco significativo)
-ELSE IF size > 50 AND internalEdgeDensity < 0.3:
-    penalty = 0.2  (muy grande y poco conectado)
-ELSE:
-    penalty = 0.0
-
-cohesionAdj = max(0, cohesionBase - penalty)
+cohesionAdj = 0.7 × averageCohesion + 0.3 × internalDensity
 ```
 
 #### 4.2 External Coupling
@@ -353,17 +362,23 @@ ELSE:
 
 Genera explicaciones en español:
 
+Tambien calcula métricas de calidad de código:
+- **CBO (Coupling Between Objects)**: Bajo <= 5, Alto > 10.
+- **LCOM (Lack of Cohesion of Methods)**: Bajo <= 0.3, Alto > 0.6.
+
+Genera explicaciones detalladas basadas en métricas:
+
 ```
 IF cohesionAdj >= 0.7:
-    "✅ Alta cohesión interna ({cohesion}%) - componentes bien relacionados"
+    "✅ Alta cohesión interna..."
 ELSE IF cohesionAdj >= 0.5:
-    "⚠️ Cohesión moderada ({cohesion}%) - posible mejora con refactorización"
-ELSE:
-    "❌ Baja cohesión ({cohesion}%) - componentes poco relacionados"
+    "⚠️ Cohesión moderada..."
 
 IF externalCoupling < 0.3:
-    "✅ Bajo acoplamiento externo ({coupling}%) - buena independencia"
-...
+    "✅ Bajo acoplamiento externo..."
+
+IF cbo > 10:
+    "❌ CBO alto..."
 ```
 
 ### Recommended Actions
@@ -388,26 +403,26 @@ Acciones específicas por viabilidad:
 
 ### Ejemplo Numérico
 
-**Propuesta**: "Microservicio de Order"
+**Propuesta**: "Componente de Order"
 
 ```
 Clusters: {1, 4}
 Components: 8
-Cohesion base: 0.65
-Internal edge density: 0.35
-Size penalty: 0 (8 componentes ok)
-Cohesion adjusted: 0.65
+Average Cohesion: 0.65
+Internal density: 0.35
+Cohesion Adjusted: 0.7*0.65 + 0.3*0.35 = 0.56
 
-Internal calls: 20
-External calls: 5
-External coupling: 5/25 = 0.2
+External coupling: 0.2
+Data cohesion: 0.7
 
-Data jaccard: 0.7
-Data cohesion: max(0.5, 0.7) = 0.7
+Base Score = 0.5*0.56 + 0.35*(0.8) + 0.15*0.7
+           = 0.28 + 0.28 + 0.105
+           = 0.665
 
-viabilityScore = 0.5×0.65 + 0.35×(1-0.2) + 0.15×0.7
-               = 0.325 + 0.28 + 0.105
-               = 0.71  → ALTA ✅
+Size penalty: None (size 8)
+
+Final Score: 0.665 → MEDIA
+(Rationale incluye métricas CBO/LCOM si disponibles)
 ```
 
 ---

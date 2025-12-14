@@ -35,7 +35,7 @@ mvn exec:java -Dexec.args="/home/runner/workspace/spring-boot-monolith output.js
 
 ### Archivos Generados
 
-La herramienta genera automáticamente **4 archivos JSON** especializados:
+La herramienta genera automáticamente **2 archivos JSON** especializados:
 
 1. **`output.json`** - Grafo completo de dependencias con todos los componentes.
 2. **`output_architecture.json`** - Propuesta consolidada de microservicios con clasificación de viabilidad.
