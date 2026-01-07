@@ -223,11 +223,11 @@ Revisa `output.json` para mapear todas las dependencias entre componentes y libr
 
 ## 🔧 Características Principales
 
-### Motor de Análisis Estático (Spoon)
+### Motor de Análisis de Código (Spoon)
 - **Análisis de AST**: Parsea el código fuente sin necesidad de compilarlo.
 - **Soporte Multi-módulo**: Recorre recursivamente árboles de directorios.
 - **Procesamiento de Anotaciones**: Soporte completo para Lombok y otros procesadores.
-
+- **Análisis Estático de Patrones**: Detecta bugs (comparación de Strings), errores de gestión de excepciones y desviaciones de estilo (nomenclatura de paquetes, hardcoded literals).
 ### Modelo de Análisis Basado en Componentes
 Cada clase, interfaz o enum se modela como un "componente" con metadatos ricos:
 - **Clasificación de Capas**: Asignación automática a capas arquitectónicas.
@@ -517,6 +517,7 @@ src/main/java/com/extractor/
 │   ├── TableNameExtractor.java        # Extracción de nombres de tablas
 │   ├── ClassNameValidator.java        # Validación de nombres de clases
 │   ├── SpoonLauncherFactory.java      # Fábrica de configuración Spoon
+│   ├── StaticCodeAnalyzer.java        # Analizador de patrones de código y estilo
 │   └── SourcePathDiscoverer.java      # Descubridor de rutas fuente
 ├── constants/                         # Constantes del sistema
 │   └── LayerConstants.java            # Constantes de capas
@@ -550,6 +551,7 @@ src/main/java/com/extractor/
 │   ├── CallInfo.java                  # Información de llamadas
 │   ├── DependencyInfo.java            # Información de dependencias
 │   ├── PackageGroup.java              # Agrupación de paquetes
+│   ├── CodeIssue.java                 # Modelo de hallazgos de análisis estático
 │   └── WebArchitecture.java           # Arquitectura web
 └── utils/                             # Utilidades de detección
     ├── DatabaseDetector.java          # Detección de BD
