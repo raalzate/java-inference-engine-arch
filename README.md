@@ -35,10 +35,11 @@ mvn exec:java -Dexec.args="/home/runner/workspace/spring-boot-monolith output.js
 
 ### Archivos Generados
 
-La herramienta genera automáticamente **2 archivos JSON** especializados:
+La herramienta genera automáticamente **3 archivos JSON** especializados:
 
 1. **`output.json`** - Grafo completo de dependencias con todos los componentes.
 2. **`output_architecture.json`** - Propuesta consolidada de microservicios con clasificación de viabilidad.
+3. **`output_entrypoints.json`** - Contratos de API (OpenAPI) extraídos de controladores y listeners.
 
 ## 📋 Referencia de Salidas
 
@@ -116,6 +117,40 @@ Propuesta final de agrupación lógica:
 - `external_coupling`: Ratio de llamadas externas vs totales
 - `data_jaccard`: Similitud de tablas compartidas (0-1)
 - `internal_edge_density`: Densidad de conexiones internas
+
+### 3. Contratos de API (`output_entrypoints.json`)
+
+Endpoints REST y listeners extraídos automáticamente:
+
+```json
+{
+  "endpoints": [
+    {
+      "id": "MovementController.registerMovement",
+      "path": "/movimientos/crearMovimiento",
+      "method": "POST",
+      "parameters": [],
+      "request_body_schema": "Movement",
+      "response_schema": "Movement",
+      "component_id": "banco_hexagonal.pruebatecnica.infraestructure.Adapter.Web.MovementController"
+    }
+  ],
+  "schemas": {
+    "Movement": {
+      "type": "object",
+      "properties": {
+        "movementId": { "type": "long" },
+        "movementType": { "type": "String" },
+        "value": { "type": "Double" }
+      }
+    }
+  }
+}
+```
+
+**Tipos de Endpoints Detectados:**
+- **REST**: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`
+- **Listeners**: `KAFKA_LISTEN`, `RABBIT_LISTEN`, `JMS_LISTEN`
 
 ## 📊 Estructura de Datos del Grafo
 

@@ -125,6 +125,10 @@ public class Component {
         }
     }
 
+    public List<String> getFiles() {
+        return files;
+    }
+
     public List<CodeIssue> getCodeIssues() {
         return codeIssues;
     }

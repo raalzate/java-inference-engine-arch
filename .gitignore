@@ -80,3 +80,6 @@ build/
 # Local configuration
 .local/
 .config/
+
+java-standar
+jee-architecture-master

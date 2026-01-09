@@ -44,6 +44,7 @@ public class ProjectAnalyzer {
     private TableNameExtractor tableNameExtractor;
     private ClassNameValidator classNameValidator;
     private StaticCodeAnalyzer staticCodeAnalyzer;
+    private OpenApiExtractor openApiExtractor;
 
     public ProjectAnalyzer() {
         this(false);
@@ -61,6 +62,7 @@ public class ProjectAnalyzer {
         this.tableNameExtractor = new TableNameExtractor();
         this.classNameValidator = new ClassNameValidator(componentRegistry);
         this.staticCodeAnalyzer = new StaticCodeAnalyzer();
+        this.openApiExtractor = new OpenApiExtractor(componentRegistry.getApiContracts());
     }
 
     /**
@@ -125,7 +127,9 @@ public class ProjectAnalyzer {
         // Get sorted components for deterministic output
         List<Component> sortedComponents = componentRegistry.getSortedComponents();
 
-        return new DependencyGraph(sortedComponents, edges);
+        DependencyGraph graph = new DependencyGraph(sortedComponents, edges);
+        graph.setApiContracts(componentRegistry.getApiContracts());
+        return graph;
     }
 
     /**
@@ -209,6 +213,8 @@ public class ProjectAnalyzer {
 
             // Perform static code analysis for patterns
             staticCodeAnalyzer.analyzeType(type, component);
+            // Extract API contracts
+            openApiExtractor.extractFromType(type);
 
             componentRegistry.registerComponent(component);
 

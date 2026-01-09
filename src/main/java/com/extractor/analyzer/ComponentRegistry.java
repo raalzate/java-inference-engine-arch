@@ -1,6 +1,7 @@
 package com.extractor.analyzer;
 
 import com.extractor.model.Component;
+import com.extractor.model.DependencyGraph;
 import com.extractor.inference.LayerClassifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,11 @@ public class ComponentRegistry {
     private static final Logger logger = LoggerFactory.getLogger(ComponentRegistry.class);
     private final Map<String, Component> components = new HashMap<>();
     private final LayerClassifier layerClassifier = new LayerClassifier();
+    private final DependencyGraph.ApiContracts apiContracts = new DependencyGraph.ApiContracts();
+
+    public DependencyGraph.ApiContracts getApiContracts() {
+        return apiContracts;
+    }
 
     public void registerComponent(Component component) {
         components.put(component.getId(), component);

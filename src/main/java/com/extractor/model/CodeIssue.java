@@ -24,6 +24,7 @@ public class CodeIssue {
 
     public enum Severity {
         INFO,
+        CRITICAL,
         WARNING,
         ERROR
     }
